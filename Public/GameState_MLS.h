@@ -49,4 +49,5 @@ class PNPMLS_API AGameState_MLS : public AGameStateBase, public IGameInterface
 		void KillPlayer(ACharacter* Character, AController* Instigator);
 		virtual void KillPlayer_Implementation(ACharacter* Character, AController* Instigator);
 		void BroadcastAddKillfeed(APlayerState* Killed, APlayerState* Killer);
+		void FindPlayerMatchPlaced(APlayerState* Player);
 };

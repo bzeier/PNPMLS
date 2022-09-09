@@ -5,6 +5,7 @@
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/GameMode.h"
 #include "GameFramework/PlayerState.h"
+#include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
 
 void AGameState_MLS::BeginPlay() {
@@ -98,9 +99,12 @@ void AGameState_MLS::KillPlayer_Implementation(ACharacter* Character, AControlle
 
 		if (canRespawn) {
 			RespawnQueue.Add(Character);
-			Multicast_RespawnPlayer(RespawnQueue[0]);
-			AGameModeBase* gamemode = GetDefaultGameMode<AGameModeBase>();
-			IGameInterface::Execute_RespawnPlayer(gamemode<UObject>());
+			ACharacter* firstPlayer = RespawnQueue[0];
+			Multicast_RespawnPlayer(firstPlayer);
+			AGameMode* gamemode = Cast< AGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+			IGameInterface::Execute_RespawnPlayer(gamemode, firstPlayer);
+			IGameInterface::Execute_RespawnPlayer(firstPlayer, firstPlayer);
+			RespawnQueue.RemoveSingle(firstPlayer);
 		}
 	}
 }
