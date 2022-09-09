@@ -91,6 +91,16 @@ void AGameState_MLS::KillPlayer_Implementation(ACharacter* Character, AControlle
 		if (Instigator) {
 			BroadcastAddKillfeed(Character->GetPlayerState(), Instigator->GetPlayerState<APlayerState>());
 			IGameInterface::Execute_AddKill(Instigator->GetPlayerState<UObject>());
+			FindPlayerMatchPlaced(Instigator->GetPlayerState<APlayerState>());
+			Multicast_SetMatchPlacedArray(PlayerArraySortedByKills);
+			bool won;
+			APlayerState* winner;
+			MatchHasBeenWon(won, winner);
+			if (won) {
+				Winner = winner;
+				IGameInterface::Execute_EndMatch(this);
+			}
+
 		}
 		else {
 			BroadcastAddKillfeed(Character->GetPlayerState(), nullptr);
@@ -112,6 +122,18 @@ void AGameState_MLS::KillPlayer_Implementation(ACharacter* Character, AControlle
 void AGameState_MLS::BroadcastAddKillfeed(APlayerState* Killed, APlayerState* Killer)
 {
 
+}
+
+void AGameState_MLS::FindPlayerMatchPlaced(APlayerState* Player)
+{
+}
+
+void AGameState_MLS::Multicast_SetMatchPlacedArray(TArray<APlayerState*> MatchPlacedArray)
+{
+}
+
+void AGameState_MLS::MatchHasBeenWon(bool& HasBeenWon, APlayerState*& Winner)
+{
 }
 
 

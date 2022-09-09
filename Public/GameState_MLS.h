@@ -26,7 +26,11 @@ class PNPMLS_API AGameState_MLS : public AGameStateBase, public IGameInterface
 			bool canRespawn = true;
 		UPROPERTY(BlueprintReadOnly)
 			TArray<ACharacter*> RespawnQueue;
+		UPROPERTY(BlueprintReadOnly)
+			TArray<APlayerState*> PlayerArraySortedByKills;
 		bool canRespawn = true;
+		UPROPERTY(BlueprintReadOnly)
+			APlayerState* Winner;
 		void BeginPlay();
 		UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 		void StartGame();
@@ -50,4 +54,7 @@ class PNPMLS_API AGameState_MLS : public AGameStateBase, public IGameInterface
 		virtual void KillPlayer_Implementation(ACharacter* Character, AController* Instigator);
 		void BroadcastAddKillfeed(APlayerState* Killed, APlayerState* Killer);
 		void FindPlayerMatchPlaced(APlayerState* Player);
+		UFUNCTION(NetMulticast, Reliable)
+		void Multicast_SetMatchPlacedArray(TArray<APlayerState*> MatchPlacedArray);
+		void MatchHasBeenWon(bool& HasBeenWon, APlayerState*& Winner);
 };
