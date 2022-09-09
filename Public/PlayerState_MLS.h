@@ -14,6 +14,10 @@ UCLASS()
 class PNPMLS_API APlayerState_MLS : public APlayerState, public IGameInterface
 {
 	GENERATED_BODY()
+private:
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Client)
+		void Client_ShowPlayerAlert(const FString& message);
+		virtual void Client_ShowPlayerAlert_Implementation(const FString& message);
 
 
 public:
