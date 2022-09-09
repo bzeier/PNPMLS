@@ -16,7 +16,7 @@ void AGameState_MLS::BeginPlay() {
 		APlayerController* pController = GetWorld()->GetFirstPlayerController();
 
 		if (LevelName == "MainMenu") {
-			WBP_MainMenu = CreateWidget<UUserWidget>(pController, WBP_MainMenu_Class);
+			WBP_MainMenu = CreateWidget(GetWorld(), WBP_MainMenu_Class);
 			WBP_MainMenu->AddToViewport();
 			pController->SetInputMode(FInputModeGameAndUI());
 			pController->SetShowMouseCursor(true);
@@ -24,7 +24,7 @@ void AGameState_MLS::BeginPlay() {
 			IGameInterface::Execute_GetMatchConclusion(GetGameInstance<UObject>());
 
 		} else if (LevelName == "Lobby") {
-			WBP_Lobby = CreateWidget<UUserWidget>(pController, WBP_Lobby_Class);
+			WBP_Lobby = CreateWidget(GetWorld(), WBP_Lobby_Class);
 			WBP_Lobby->AddToViewport();
 			pController->SetInputMode(FInputModeGameAndUI());
 			pController->SetShowMouseCursor(true);
@@ -32,9 +32,9 @@ void AGameState_MLS::BeginPlay() {
 			IGameInterface::Execute_GetMatchConclusion(GetGameInstance<UObject>());
 
 		} else if (LevelName == "GameMap") {
-			WBP_GameOverlay = CreateWidget<UUserWidget>(pController, WBP_GameOverlay_Class);
+			WBP_GameOverlay = CreateWidget(GetWorld(), WBP_GameOverlay_Class);
 			WBP_GameOverlay->AddToViewport();
-			WBP_Loading = CreateWidget<UUserWidget>(pController, WBP_Loading_Class);
+			WBP_Loading = CreateWidget(GetWorld(), WBP_Loading_Class);
 			WBP_Loading->AddToViewport();
 			pController->SetInputMode(FInputModeGameOnly());
 			pController->SetShowMouseCursor(false);
@@ -73,21 +73,21 @@ void AGameState_MLS::UpdatePlayerlist_Implementation()
 	Multicast_UpdatePlayerlist();
 }
 
-void AGameState_MLS::Multicast_UpdatePlayerlist()
+void AGameState_MLS::Multicast_UpdatePlayerlist_Implementation()
 {
 	if (!IsRunningDedicatedServer()) {
 
 	}
 }
 
-void AGameState_MLS::Multicast_KillPlayer(ACharacter* Character)
+void AGameState_MLS::Multicast_KillPlayer_Implementation(ACharacter* Character)
 {
 	Character->GetMesh()->SetSimulatePhysics(true);
 	Character->GetMesh()->SetOwnerNoSee(true);
 	Character->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
 }
 
-void AGameState_MLS::Multicast_RespawnPlayer(ACharacter* Character)
+void AGameState_MLS::Multicast_RespawnPlayer_Implementation(ACharacter* Character)
 {
 	
 	Character->GetMesh()->SetSimulatePhysics(false);

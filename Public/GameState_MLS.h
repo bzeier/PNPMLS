@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameInterface.h"
-#include "Blueprint/UserWidget.h"
 #include "GameState_MLS.generated.h"
 
 /**
@@ -68,15 +67,23 @@ public:
 		UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 		void UpdatePlayerlist();
 		virtual void UpdatePlayerlist_Implementation();
+
 		UFUNCTION(NetMulticast, Reliable)
 		void Multicast_UpdatePlayerlist();
+		virtual void Multicast_UpdatePlayerlist_Implementation();
+
 		UFUNCTION(NetMulticast, Reliable)
 		void Multicast_KillPlayer(ACharacter* Character);
+		virtual void Multicast_KillPlayer_Implementation(ACharacter* Character);
+
 		UFUNCTION(NetMulticast, Reliable)
 		void Multicast_RespawnPlayer(ACharacter* Character);
+		virtual void Multicast_RespawnPlayer_Implementation(ACharacter* Character);
+
 		UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 		void KillPlayer(ACharacter* Character, AController* _instigator);
 		virtual void KillPlayer_Implementation(ACharacter* Character, AController* _instigator);
+
 		void BroadcastAddKillfeed(APlayerState* Killed, APlayerState* Killer);
 		void FindPlayerMatchPlaced(APlayerState* Player);
 
