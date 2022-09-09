@@ -59,6 +59,24 @@ void AGameState_MLS::StartMatch_Implementation()
 	}
 }
 
+void AGameState_MLS::EndMatch_Implementation()
+{
+	if (HasAuthority()) {
+		CreateMatchConclusions();
+		TogglePlayerInput(false);
+
+		if(Winner) IGameInterface::Execute_CreateWinLooseWidget(Winner, true);
+
+		for (APlayerState* p : PlayerArray) {
+			if (p != Winner) {
+				IGameInterface::Execute_CreateWinLooseWidget(p, false);
+			}
+		}
+		AGameMode* gamemode = Cast< AGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+		IGameInterface::Execute_EndGame(gamemode);
+	}
+}
+
 void AGameState_MLS::TogglePlayerInput(bool enable)
 {
 
@@ -76,7 +94,7 @@ void AGameState_MLS::UpdatePlayerlist_Implementation()
 void AGameState_MLS::Multicast_UpdatePlayerlist_Implementation()
 {
 	if (!IsRunningDedicatedServer()) {
-
+		//WBP_Lobby->UpdatePlayerlist;
 	}
 }
 
@@ -150,6 +168,17 @@ void AGameState_MLS::FindPlayerMatchPlaced(APlayerState* Player)
 
 void AGameState_MLS::Multicast_SetMatchPlacedArray_Implementation(const TArray<APlayerState*> &MatchPlacedArray)
 {
+	PlayerArraySortedByKills = MatchPlacedArray;
+}
+
+void AGameState_MLS::Multicast_MatchTime_Implementation(int time)
+{
+	MatchTime = time;
+}
+
+void AGameState_MLS::Multicast_MatchBeginTime_Implementation(int time)
+{
+	MatchBeginTime = time;
 }
 
 void AGameState_MLS::MatchHasBeenWon(bool& HasBeenWon, APlayerState& winner)
@@ -173,11 +202,43 @@ void AGameState_MLS::DecreaseMatchTimer()
 
 void AGameState_MLS::Server_ReadyUp_Implementation()
 {
+	if (GetPlayerThatAreReady()) {
+		StartIntermissionTimer();
+	}
 }
 
 void AGameState_MLS::ReadyUp_Implementation()
 {
 	Server_ReadyUp();
+}
+
+void AGameState_MLS::CreateMatchConclusions()
+{
+}
+
+void AGameState_MLS::CancelIntermissionTimer_Implementation()
+{
+	IntermissionTime = -1;
+	if (IntermissionTimerHandle.IsValid()) {
+		IntermissionTimerHandle.Invalidate();
+	}
+
+}
+
+void AGameState_MLS::StartIntermissionTimer()
+{
+	IntermissionTime = IntermissionStartTime;
+	GetWorld()->GetTimerManager().SetTimer(IntermissionTimerHandle, this, &AGameState_MLS::DecreaseIntermissionTimer, 1.0f, true);
+}
+
+void AGameState_MLS::DecreaseIntermissionTimer()
+{
+
+}
+
+bool AGameState_MLS::GetPlayerThatAreReady()
+{
+	return false;
 }
 
 

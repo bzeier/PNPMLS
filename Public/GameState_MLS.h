@@ -44,6 +44,18 @@ public:
 			bool canRespawn = true;
 
 		UPROPERTY(BlueprintReadOnly)
+			int MatchTime = 900;
+
+		UPROPERTY(BlueprintReadOnly)
+			int MatchBeginTime = 10;
+
+		UPROPERTY(BlueprintReadOnly, replicated)
+			int IntermissionTime = -1;
+
+		UPROPERTY(BlueprintReadOnly)
+			int IntermissionStartTime = 30;
+
+		UPROPERTY(BlueprintReadOnly)
 			TArray<ACharacter*> RespawnQueue;
 		UPROPERTY(BlueprintReadOnly)
 			TArray<APlayerState*> PlayerArraySortedByKills;
@@ -54,14 +66,22 @@ public:
 			FTimerHandle DecreaseMatchTimerHandle;
 
 		UPROPERTY(BlueprintReadOnly)
+			FTimerHandle IntermissionTimerHandle;
+
+		UPROPERTY(BlueprintReadOnly)
 			APlayerState* Winner;
 		void BeginPlay();
 		UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 		void StartGame();
 		virtual void StartGame_Implementation();
 		UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-		void StartMatch();
-		virtual void StartMatch_Implementation();
+			void StartMatch();
+			virtual void StartMatch_Implementation();
+
+		UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+			void EndMatch();
+			virtual void EndMatch_Implementation();
+
 		void TogglePlayerInput(bool enable);
 		void InitializePlayerArrayByKills();
 		UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
@@ -91,6 +111,14 @@ public:
 			void Multicast_SetMatchPlacedArray(const TArray<APlayerState*> &MatchPlacedArray);
 			virtual void Multicast_SetMatchPlacedArray_Implementation(const TArray<APlayerState*>& MatchPlacedArray);
 
+		UFUNCTION(NetMulticast, Reliable)
+			void Multicast_MatchTime(int time);
+			virtual void Multicast_MatchTime_Implementation(int time);
+
+		UFUNCTION(NetMulticast, Reliable)
+			void Multicast_MatchBeginTime(int time);
+			virtual void Multicast_MatchBeginTime_Implementation(int time);
+
 		void MatchHasBeenWon(bool& HasBeenWon, APlayerState& winner);
 		
 		UFUNCTION(NetMulticast, Reliable)
@@ -107,4 +135,14 @@ public:
 		UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 		void ReadyUp();
 		virtual void ReadyUp_Implementation();
+
+		void CreateMatchConclusions();
+
+		UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+			void CancelIntermissionTimer();
+			virtual void CancelIntermissionTimer_Implementation();
+
+			void StartIntermissionTimer();
+			void DecreaseIntermissionTimer();
+			bool GetPlayerThatAreReady();
 };
