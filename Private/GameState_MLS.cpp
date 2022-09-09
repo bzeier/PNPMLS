@@ -7,6 +7,7 @@
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 void AGameState_MLS::BeginPlay() {
 	if (!IsRunningDedicatedServer()) {
@@ -75,7 +76,9 @@ void AGameState_MLS::Multicast_UpdatePlayerlist()
 
 void AGameState_MLS::Multicast_KillPlayer(ACharacter* Character)
 {
-
+	Character->GetMesh()->SetSimulatePhysics(true);
+	Character->GetMesh()->SetOwnerNoSee(true);
+	Character->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
 }
 
 void AGameState_MLS::Multicast_RespawnPlayer(ACharacter* Character)
@@ -88,6 +91,8 @@ void AGameState_MLS::KillPlayer_Implementation(ACharacter* Character, AControlle
 	if (HasAuthority()) {
 		IGameInterface::Execute_AddDeath(Character->GetPlayerState<UObject>());
 		Multicast_KillPlayer(Character);
+		Character->GetController()->DisableInput(Character->GetController<APlayerController>());
+
 		if (Instigator) {
 			BroadcastAddKillfeed(Character->GetPlayerState(), Instigator->GetPlayerState<APlayerState>());
 			IGameInterface::Execute_AddKill(Instigator->GetPlayerState<UObject>());
@@ -105,7 +110,7 @@ void AGameState_MLS::KillPlayer_Implementation(ACharacter* Character, AControlle
 		else {
 			BroadcastAddKillfeed(Character->GetPlayerState(), nullptr);
 		}
-		Character->GetController()->DisableInput(Character->GetController<APlayerController>());
+		
 
 		if (canRespawn) {
 			RespawnQueue.Add(Character);
@@ -121,7 +126,11 @@ void AGameState_MLS::KillPlayer_Implementation(ACharacter* Character, AControlle
 
 void AGameState_MLS::BroadcastAddKillfeed(APlayerState* Killed, APlayerState* Killer)
 {
-
+	if (HasAuthority()) {
+		for (APlayerState* p : PlayerArray) {
+			IGameInterface::Execute_AddKillfeedMessage(p, Killed, Killer);
+		}
+	}
 }
 
 void AGameState_MLS::FindPlayerMatchPlaced(APlayerState* Player)
