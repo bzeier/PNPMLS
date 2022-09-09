@@ -183,7 +183,7 @@ void AGameState_MLS::FindPlayerMatchPlaced(APlayerState* Player)
 		for (APlayerState* p : APlayerStates) // change to standard int for loop
 		{
 			IGameInterface::Execute_GetPlayerInfo(p, playerName, playerKills, playerDeaths, playerPlaced);
-			if (playerKills > kills) {
+			if (playerKills >= kills) {
 				topPlayerState = p;
 				kills = playerKills;
 			}
