@@ -108,4 +108,6 @@ public:
 		APlayerController* GetActivePlayerController();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 		void SetActivePlayerController(APlayerController* PlayerController);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+		void GetPlayerIsReady(bool& isReady);
 };

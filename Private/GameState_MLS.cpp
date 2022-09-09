@@ -198,6 +198,14 @@ void AGameState_MLS::DecreaseMatchBeginTimer()
 
 void AGameState_MLS::DecreaseMatchTimer()
 {
+	MatchTime--;
+	Multicast_MatchTime(MatchTime);
+	if (MatchTime == 0) {
+		DecreaseMatchTimerHandle.Invalidate();
+		if (HasAuthority()) {
+			IGameInterface::Execute_EndMatch(this);
+		}
+	}
 }
 
 void AGameState_MLS::Server_ReadyUp_Implementation()
@@ -233,12 +241,30 @@ void AGameState_MLS::StartIntermissionTimer()
 
 void AGameState_MLS::DecreaseIntermissionTimer()
 {
-
+	IntermissionTime--;
+	if (IntermissionTime == 0) {
+		IntermissionTimerHandle.Invalidate();
+		Multicast_DestroyWidgets();
+		if (HasAuthority()) {
+			AGameModeBase* gamemode = (UGameplayStatics::GetGameMode(GetWorld()));
+			IGameInterface::Execute_TravelToGameMap(gamemode);
+		}
+	}
 }
 
 bool AGameState_MLS::GetPlayerThatAreReady()
 {
-	return false;
+	bool AllAreReady = true;
+	bool isready;
+	for (APlayerState* p : PlayerArray) {
+		IGameInterface::Execute_GetPlayerIsReady(p, isready);
+		if (!isready) {
+			AllAreReady = false;
+			return AllAreReady;
+		}
+	}
+
+	return AllAreReady;
 }
 
 
