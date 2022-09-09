@@ -148,4 +148,5 @@ public:
 			void StartIntermissionTimer();
 			void DecreaseIntermissionTimer();
 			bool GetPlayerThatAreReady();
+			void SetPlayerScore();
 };

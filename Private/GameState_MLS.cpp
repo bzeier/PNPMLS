@@ -10,6 +10,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Net/UnrealNetwork.h" 
+#include "Math/UnrealMathUtility.h"
 
 void AGameState_MLS::BeginPlay() {
 	if (!IsRunningDedicatedServer()) {
@@ -87,6 +88,7 @@ void AGameState_MLS::TogglePlayerInput(bool enable)
 
 void AGameState_MLS::InitializePlayerArrayByKills()
 {
+	PlayerArraySortedByKills = PlayerArray;
 }
 
 void AGameState_MLS::UpdatePlayerlist_Implementation()
@@ -304,6 +306,21 @@ bool AGameState_MLS::GetPlayerThatAreReady()
 	}
 
 	return AllAreReady;
+}
+
+void AGameState_MLS::SetPlayerScore()
+{
+	int score = 0;
+	FName playerName;
+	int playerKills = 0;
+	int playerDeaths = 0;
+	int playerPlaced = 0;
+
+	for (APlayerState* p : PlayerArray) {
+		IGameInterface::Execute_GetPlayerInfo(p, playerName, playerKills, playerDeaths, playerPlaced);
+		score = FMath::Clamp(((playerKills * 50) - (playerDeaths * 10)), 0, 9999);
+		IGameInterface::Execute_SetPlayerScore(p, score);
+	}
 }
 
 void AGameState_MLS::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
