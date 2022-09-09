@@ -8,6 +8,9 @@
 #include "Blueprint/UserWidget.h"
 #include "GameInterface.generated.h"
 
+//little overuse of interface but works for this purpose
+
+
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
 class UGameInterface : public UInterface
