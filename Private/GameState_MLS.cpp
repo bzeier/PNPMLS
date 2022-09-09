@@ -9,6 +9,7 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Net/UnrealNetwork.h" 
 
 void AGameState_MLS::BeginPlay() {
 	if (!IsRunningDedicatedServer()) {
@@ -79,7 +80,9 @@ void AGameState_MLS::EndMatch_Implementation()
 
 void AGameState_MLS::TogglePlayerInput(bool enable)
 {
-
+	for (APlayerState* p : PlayerArray) {
+		//p-
+	}
 }
 
 void AGameState_MLS::InitializePlayerArrayByKills()
@@ -201,7 +204,6 @@ void AGameState_MLS::MatchHasBeenWon(bool& HasBeenWon, APlayerState& winner)
 		}
 
 		HasBeenWon = matchWon;
-		winner = _winner;
 	}
 }
 
@@ -302,6 +304,11 @@ bool AGameState_MLS::GetPlayerThatAreReady()
 	}
 
 	return AllAreReady;
+}
+
+void AGameState_MLS::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+{
+	DOREPLIFETIME(AGameState_MLS, IntermissionTime);
 }
 
 

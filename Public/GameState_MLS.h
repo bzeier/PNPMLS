@@ -54,6 +54,7 @@ public:
 
 		UPROPERTY(BlueprintReadOnly)
 			int IntermissionStartTime = 30;
+
 		UPROPERTY(EditAnywhere)
 			int KillRequiredToWin = 30;
 
