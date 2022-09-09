@@ -183,6 +183,26 @@ void AGameState_MLS::Multicast_MatchBeginTime_Implementation(int time)
 
 void AGameState_MLS::MatchHasBeenWon(bool& HasBeenWon, APlayerState& winner)
 {
+	bool matchWon = false;
+	APlayerState* _winner;
+
+	FName playerName;
+	int playerKills = 0;
+	int playerDeaths = 0;
+	int playerPlaced = 0;
+
+	for (APlayerState* p : PlayerArray) {
+		IGameInterface::Execute_GetPlayerInfo(p, playerName, playerKills, playerDeaths, playerPlaced);
+		if (playerKills >= KillRequiredToWin) {
+			matchWon = true;
+			Winner = p;
+			_winner = p;
+			break;
+		}
+
+		HasBeenWon = matchWon;
+		winner = _winner;
+	}
 }
 
 void AGameState_MLS::Multicast_DestroyWidgets_Implementation()
@@ -194,6 +214,23 @@ void AGameState_MLS::Multicast_DestroyWidgets_Implementation()
 
 void AGameState_MLS::DecreaseMatchBeginTimer()
 {
+	AGameModeBase* gamemode = UGameplayStatics::GetGameMode(GetWorld());
+	bool quickDebug;
+	IGameInterface::Execute_GetQuickDebug(gamemode, quickDebug);
+	if (quickDebug) {
+		MatchBeginTime = 0;
+	}
+	else {
+		MatchBeginTime--;
+	}
+
+	Multicast_MatchBeginTime(MatchBeginTime);
+	if (MatchBeginTime == 0) {
+		DecreaseMatchBeginTimerHandle.Invalidate();
+		if (HasAuthority()) {
+			IGameInterface::Execute_StartMatch(this);
+		}
+	}
 }
 
 void AGameState_MLS::DecreaseMatchTimer()

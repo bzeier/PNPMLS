@@ -54,6 +54,8 @@ public:
 
 		UPROPERTY(BlueprintReadOnly)
 			int IntermissionStartTime = 30;
+		UPROPERTY(EditAnywhere)
+			int KillRequiredToWin = 30;
 
 		UPROPERTY(BlueprintReadOnly)
 			TArray<ACharacter*> RespawnQueue;
