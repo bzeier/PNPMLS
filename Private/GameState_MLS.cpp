@@ -8,30 +8,34 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/CapsuleComponent.h"
 
 void AGameState_MLS::BeginPlay() {
 	if (!IsRunningDedicatedServer()) {
 		FString LevelName = GetWorld()->GetCurrentLevel()->GetName();
+		APlayerController* pController = GetWorld()->GetFirstPlayerController();
+
 		if (LevelName == "MainMenu") {
-			CreateWidget<UUserWidget>(this, WBP_MainMenu)->AddToViewport();
-			APlayerController* pController = GetWorld()->GetFirstPlayerController();
+			WBP_MainMenu = CreateWidget<UUserWidget>(pController, WBP_MainMenu_Class);
+			WBP_MainMenu->AddToViewport();
 			pController->SetInputMode(FInputModeGameAndUI());
 			pController->SetShowMouseCursor(true);
 
 			IGameInterface::Execute_GetMatchConclusion(GetGameInstance<UObject>());
 
 		} else if (LevelName == "Lobby") {
-			CreateWidget<UUserWidget>(this, WBP_Lobby)->AddToViewport();
-			APlayerController* pController = GetWorld()->GetFirstPlayerController();
+			WBP_Lobby = CreateWidget<UUserWidget>(pController, WBP_Lobby_Class);
+			WBP_Lobby->AddToViewport();
 			pController->SetInputMode(FInputModeGameAndUI());
 			pController->SetShowMouseCursor(true);
 
 			IGameInterface::Execute_GetMatchConclusion(GetGameInstance<UObject>());
 
 		} else if (LevelName == "GameMap") {
-			CreateWidget<UUserWidget>(this, WBP_GameOverlay)->AddToViewport();
-			CreateWidget<UUserWidget>(this, WBP_Loading)->AddToViewport();
-			APlayerController* pController = GetWorld()->GetFirstPlayerController();
+			WBP_GameOverlay = CreateWidget<UUserWidget>(pController, WBP_GameOverlay_Class);
+			WBP_GameOverlay->AddToViewport();
+			WBP_Loading = CreateWidget<UUserWidget>(pController, WBP_Loading_Class);
+			WBP_Loading->AddToViewport();
 			pController->SetInputMode(FInputModeGameOnly());
 			pController->SetShowMouseCursor(false);
 
@@ -42,14 +46,16 @@ void AGameState_MLS::BeginPlay() {
 void AGameState_MLS::StartGame_Implementation()
 {
 	if (HasAuthority()) {
-
+		GetWorld()->GetTimerManager().SetTimer(DecreaseMatchBeginTimerHandle, this, &AGameState_MLS::DecreaseMatchBeginTimer, 1.0f, true);
 	}
 }
 
 void AGameState_MLS::StartMatch_Implementation()
 {
 	if (HasAuthority()) {
-
+		TogglePlayerInput(true);
+		InitializePlayerArrayByKills();
+		GetWorld()->GetTimerManager().SetTimer(DecreaseMatchTimerHandle, this, &AGameState_MLS::DecreaseMatchTimer, 1.0f, true);
 	}
 }
 
@@ -83,24 +89,29 @@ void AGameState_MLS::Multicast_KillPlayer(ACharacter* Character)
 
 void AGameState_MLS::Multicast_RespawnPlayer(ACharacter* Character)
 {
-
+	
+	Character->GetMesh()->SetSimulatePhysics(false);
+	Character->GetCapsuleComponent()->SetupAttachment(Character->GetMesh());
+	FTransform MeshOffset = FTransform(FRotator(0,0, 270.0), FVector(0, -1.41291, -90.578857), FVector(1,1,1));
+	Character->GetMesh()->SetRelativeTransform(MeshOffset);
+	Character->GetMesh()->SetOwnerNoSee(true);
+	Character->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 }
 
-void AGameState_MLS::KillPlayer_Implementation(ACharacter* Character, AController* Instigator)
+void AGameState_MLS::KillPlayer_Implementation(ACharacter* Character, AController* _instigator)
 {
 	if (HasAuthority()) {
 		IGameInterface::Execute_AddDeath(Character->GetPlayerState<UObject>());
 		Multicast_KillPlayer(Character);
 		Character->GetController()->DisableInput(Character->GetController<APlayerController>());
-
-		if (Instigator) {
-			BroadcastAddKillfeed(Character->GetPlayerState(), Instigator->GetPlayerState<APlayerState>());
-			IGameInterface::Execute_AddKill(Instigator->GetPlayerState<UObject>());
-			FindPlayerMatchPlaced(Instigator->GetPlayerState<APlayerState>());
+		if (_instigator) {
+			BroadcastAddKillfeed(Character->GetPlayerState(), _instigator->GetPlayerState<APlayerState>());
+			IGameInterface::Execute_AddKill(_instigator->GetPlayerState<UObject>());
+			FindPlayerMatchPlaced(_instigator->GetPlayerState<APlayerState>());
 			Multicast_SetMatchPlacedArray(PlayerArraySortedByKills);
 			bool won;
-			APlayerState* winner;
-			MatchHasBeenWon(won, winner);
+			APlayerState* winner = nullptr;
+			MatchHasBeenWon(won, *winner);
 			if (won) {
 				Winner = winner;
 				IGameInterface::Execute_EndMatch(this);
@@ -137,12 +148,36 @@ void AGameState_MLS::FindPlayerMatchPlaced(APlayerState* Player)
 {
 }
 
-void AGameState_MLS::Multicast_SetMatchPlacedArray(TArray<APlayerState*> MatchPlacedArray)
+void AGameState_MLS::Multicast_SetMatchPlacedArray(const TArray<APlayerState*> &MatchPlacedArray)
 {
 }
 
-void AGameState_MLS::MatchHasBeenWon(bool& HasBeenWon, APlayerState*& Winner)
+void AGameState_MLS::MatchHasBeenWon(bool& HasBeenWon, APlayerState& winner)
 {
+}
+
+void AGameState_MLS::Multicast_DestroyWidgets()
+{
+	if (WBP_Lobby) {
+		WBP_Lobby->RemoveFromParent();
+	}
+}
+
+void AGameState_MLS::DecreaseMatchBeginTimer()
+{
+}
+
+void AGameState_MLS::DecreaseMatchTimer()
+{
+}
+
+void AGameState_MLS::Server_ReadyUp()
+{
+}
+
+void AGameState_MLS::ReadyUp_Implementation()
+{
+	Server_ReadyUp();
 }
 
 

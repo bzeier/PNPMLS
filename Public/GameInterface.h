@@ -71,7 +71,7 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 		void HasSpawnedIn(bool& has);
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-		void KillPlayer(ACharacter* Character, AController* Instigator);
+		void KillPlayer(ACharacter* Character, AController* _instigator);
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 		void RespawnPlayer(ACharacter* Character);
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)

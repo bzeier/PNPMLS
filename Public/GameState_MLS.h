@@ -14,21 +14,45 @@ UCLASS()
 class PNPMLS_API AGameState_MLS : public AGameStateBase, public IGameInterface
 {
 	GENERATED_BODY()
+
+public:
 		UPROPERTY(EditAnywhere)
-		TSubclassOf<UUserWidget> WBP_MainMenu;
+		TSubclassOf<UUserWidget> WBP_MainMenu_Class;
+
 		UPROPERTY(EditAnywhere)
-		TSubclassOf<UUserWidget> WBP_Lobby;
+		TSubclassOf<UUserWidget> WBP_Lobby_Class;
+
 		UPROPERTY(EditAnywhere)
-		TSubclassOf<UUserWidget> WBP_GameOverlay;
+		TSubclassOf<UUserWidget> WBP_GameOverlay_Class;
+
 		UPROPERTY(EditAnywhere)
-		TSubclassOf<UUserWidget> WBP_Loading;
+		TSubclassOf<UUserWidget> WBP_Loading_Class;
+
+		UPROPERTY(BlueprintReadOnly)
+			UUserWidget* WBP_MainMenu;
+
+		UPROPERTY(BlueprintReadOnly)
+			UUserWidget* WBP_Lobby;
+
+		UPROPERTY(BlueprintReadOnly)
+			UUserWidget* WBP_GameOverlay;
+
+		UPROPERTY(BlueprintReadOnly)
+			UUserWidget* WBP_Loading;
+
 		UPROPERTY(EditAnywhere)
 			bool canRespawn = true;
+
 		UPROPERTY(BlueprintReadOnly)
 			TArray<ACharacter*> RespawnQueue;
 		UPROPERTY(BlueprintReadOnly)
 			TArray<APlayerState*> PlayerArraySortedByKills;
-		bool canRespawn = true;
+
+		UPROPERTY(BlueprintReadOnly)
+			FTimerHandle DecreaseMatchBeginTimerHandle;
+		UPROPERTY(BlueprintReadOnly)
+			FTimerHandle DecreaseMatchTimerHandle;
+
 		UPROPERTY(BlueprintReadOnly)
 			APlayerState* Winner;
 		void BeginPlay();
@@ -50,11 +74,22 @@ class PNPMLS_API AGameState_MLS : public AGameStateBase, public IGameInterface
 		UFUNCTION(NetMulticast, Reliable)
 		void Multicast_RespawnPlayer(ACharacter* Character);
 		UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-		void KillPlayer(ACharacter* Character, AController* Instigator);
-		virtual void KillPlayer_Implementation(ACharacter* Character, AController* Instigator);
+		void KillPlayer(ACharacter* Character, AController* _instigator);
+		virtual void KillPlayer_Implementation(ACharacter* Character, AController* _instigator);
 		void BroadcastAddKillfeed(APlayerState* Killed, APlayerState* Killer);
 		void FindPlayerMatchPlaced(APlayerState* Player);
 		UFUNCTION(NetMulticast, Reliable)
-		void Multicast_SetMatchPlacedArray(TArray<APlayerState*> MatchPlacedArray);
-		void MatchHasBeenWon(bool& HasBeenWon, APlayerState*& Winner);
+		void Multicast_SetMatchPlacedArray(const TArray<APlayerState*> &MatchPlacedArray);
+		void MatchHasBeenWon(bool& HasBeenWon, APlayerState& winner);
+		
+		UFUNCTION(NetMulticast, Reliable)
+		void Multicast_DestroyWidgets();
+
+		void DecreaseMatchBeginTimer();
+		void DecreaseMatchTimer();
+		UFUNCTION(Server, Reliable)
+			void Server_ReadyUp();
+		UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+		void ReadyUp();
+		virtual void ReadyUp_Implementation();
 };
