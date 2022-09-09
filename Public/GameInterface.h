@@ -95,7 +95,7 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 		void GetMatchConclusion();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-		void SetPlayerScore();
+		void SetPlayerScore(int score);
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 		void SetMatchPlaced(int Placed);
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)

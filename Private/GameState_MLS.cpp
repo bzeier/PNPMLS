@@ -169,6 +169,34 @@ void AGameState_MLS::BroadcastAddKillfeed(APlayerState* Killed, APlayerState* Ki
 
 void AGameState_MLS::FindPlayerMatchPlaced(APlayerState* Player)
 {
+	int kills = 0;
+	TArray<APlayerState*> APlayerStates = PlayerArraySortedByKills;
+	PlayerArraySortedByKills.Reset();
+	FName playerName;
+	int playerKills = 0;
+	int playerDeaths = 0;
+	int playerPlaced = 0;
+	APlayerState* topPlayerState;
+
+	while (APlayerStates.Num() > 0) {
+		for (APlayerState* p : APlayerStates) // change to standard int for loop
+		{
+			IGameInterface::Execute_GetPlayerInfo(p, playerName, playerKills, playerDeaths, playerPlaced);
+			if (playerKills > kills) {
+				topPlayerState = p;
+				kills = playerKills;
+			}
+		}
+
+		APlayerStates.RemoveSingle(topPlayerState);
+		PlayerArraySortedByKills.Add(topPlayerState);
+		//move here - avoid double looping
+	}
+	//move this 
+	for (int i = 0; i < PlayerArraySortedByKills.Num();i++) {
+		IGameInterface::Execute_SetMatchPlaced(PlayerArraySortedByKills[i], i+1);
+	}
+
 }
 
 void AGameState_MLS::Multicast_SetMatchPlacedArray_Implementation(const TArray<APlayerState*> &MatchPlacedArray)
