@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameInterface.h"
+#include "Blueprint/UserWidget.h"
 #include "GameState_MLS.generated.h"
 
 /**
@@ -78,17 +79,24 @@ public:
 		virtual void KillPlayer_Implementation(ACharacter* Character, AController* _instigator);
 		void BroadcastAddKillfeed(APlayerState* Killed, APlayerState* Killer);
 		void FindPlayerMatchPlaced(APlayerState* Player);
+
 		UFUNCTION(NetMulticast, Reliable)
-		void Multicast_SetMatchPlacedArray(const TArray<APlayerState*> &MatchPlacedArray);
+			void Multicast_SetMatchPlacedArray(const TArray<APlayerState*> &MatchPlacedArray);
+			virtual void Multicast_SetMatchPlacedArray_Implementation(const TArray<APlayerState*>& MatchPlacedArray);
+
 		void MatchHasBeenWon(bool& HasBeenWon, APlayerState& winner);
 		
 		UFUNCTION(NetMulticast, Reliable)
-		void Multicast_DestroyWidgets();
+			void Multicast_DestroyWidgets();
+			virtual void Multicast_DestroyWidgets_Implementation();
 
 		void DecreaseMatchBeginTimer();
 		void DecreaseMatchTimer();
+
 		UFUNCTION(Server, Reliable)
 			void Server_ReadyUp();
+			virtual void Server_ReadyUp_Implementation();
+
 		UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 		void ReadyUp();
 		virtual void ReadyUp_Implementation();

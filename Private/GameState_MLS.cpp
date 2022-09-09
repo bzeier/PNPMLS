@@ -148,7 +148,7 @@ void AGameState_MLS::FindPlayerMatchPlaced(APlayerState* Player)
 {
 }
 
-void AGameState_MLS::Multicast_SetMatchPlacedArray(const TArray<APlayerState*> &MatchPlacedArray)
+void AGameState_MLS::Multicast_SetMatchPlacedArray_Implementation(const TArray<APlayerState*> &MatchPlacedArray)
 {
 }
 
@@ -156,7 +156,7 @@ void AGameState_MLS::MatchHasBeenWon(bool& HasBeenWon, APlayerState& winner)
 {
 }
 
-void AGameState_MLS::Multicast_DestroyWidgets()
+void AGameState_MLS::Multicast_DestroyWidgets_Implementation()
 {
 	if (WBP_Lobby) {
 		WBP_Lobby->RemoveFromParent();
@@ -171,7 +171,7 @@ void AGameState_MLS::DecreaseMatchTimer()
 {
 }
 
-void AGameState_MLS::Server_ReadyUp()
+void AGameState_MLS::Server_ReadyUp_Implementation()
 {
 }
 
